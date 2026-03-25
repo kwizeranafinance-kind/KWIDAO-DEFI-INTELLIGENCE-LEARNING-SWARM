@@ -1,0 +1,2 @@
+# KWIDAO-DEFI-INTELLIGENCE-LEARNING-SWARM
+6 AGENT LEARNING SWARM SYSTEM including tools for compare and signals 
