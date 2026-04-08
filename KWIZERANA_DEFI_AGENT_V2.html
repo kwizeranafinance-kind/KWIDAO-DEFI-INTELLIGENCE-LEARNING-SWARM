@@ -770,29 +770,30 @@ const R = {
 };
 
 function findResponse(t) {
-  t = t.toLowerCase();
-  if (t.includes('tvl')||t.includes('total value')||t.includes('capital flow')) return R.tvl;
-  if (t.includes('messari')||t.includes('nvt')||t.includes('real vol')||t.includes('dev commit')) return R.messari;
-  // Token-specific – check before generic yield so "phar yield" hits phar response
-  if (t.includes('dexscreen')||t.includes('dex screen')||t.includes('new token')||t.includes('new pair')) return R.dexscreener;
-  if (t.includes('perp')||t.includes('perpetual')||t.includes('futures')||t.includes('open interest')||t.includes('funding rate')) return R.perps;
-  if (t.includes('coinmarketcap')||t.includes('cmc')||t.includes('market cap rank')) return R.cmc;
-  if (t.includes('phar')&&!t.includes('pharou')) return R.phar;
-  if (t.includes('pharou')||t.includes('p33')) return R.pharou;
-  if (t.includes('aero')||t.includes('aerodrome')) return R.aero;
-  if (t.includes('yield')||t.includes('farm')||t.includes('apy')||t.includes('pool')||t.includes('liquidity')) return R.yield;
-  if (t.includes('stablecoin')||t.includes('peg')||t.includes('depeg')) return R.stablecoin;
-  if (t.includes('hack')||t.includes('exploit')||t.includes('security')||t.includes('breach')) return R.hack;
-  if (t.includes('moats')||t.includes('reward')||t.includes('hefe')||t.includes('fort')) return R.moats;
-  if (t.includes('xau')||t.includes('gold')||t.includes('short')) return R.xau;
-  if (t.includes('fear')||t.includes('greed')||t.includes('sentiment')) return R.fear;
-  if (t.includes('trending')||t.includes('narrative')||t.includes('retail')) return R.trending;
-  if (t.includes('compar')||t.includes('chart')||t.includes('graph')||t.includes('vs')) return R.compare;
-  if (t.includes('bot')||t.includes('grid')||t.includes('status')) return R.bot;
-  // Catch any AVAX ecosystem token by symbol
+  const q = t.toLowerCase();
+  if (q.includes('tvl')||q.includes('total value')||q.includes('capital flow')) return R.tvl;
+  if (q.includes('messari')||q.includes('nvt')||q.includes('real vol')||q.includes('dev commit')) return R.messari;
+  if (q.includes('dexscreen')||q.includes('dex screen')||q.includes('new token')||q.includes('new pair')) return R.dexscreener;
+  if (q.includes('perp')||q.includes('perpetual')||q.includes('futures')||q.includes('open interest')||q.includes('funding rate')) return R.perps;
+  if (q.includes('coinmarketcap')||q.includes('cmc')||q.includes('market cap rank')) return R.cmc;
+  if (q.includes('phar')&&!q.includes('pharou')) return R.phar;
+  if (q.includes('pharou')||q.includes('p33')) return R.pharou;
+  if (q.includes('aero')||q.includes('aerodrome')) return R.aero;
+  if (q.includes('yield')||q.includes('farm')||q.includes('apy')||q.includes('pool')||q.includes('liquidity')) return R.yield;
+  if (q.includes('stablecoin')||q.includes('peg')||q.includes('depeg')) return R.stablecoin;
+  if (q.includes('hack')||q.includes('exploit')||q.includes('security')||q.includes('breach')) return R.hack;
+  if (q.includes('moats')||q.includes('reward')||q.includes('hefe')||q.includes('fort')) return R.moats;
+  if (q.includes('xau')||q.includes('gold')||q.includes('short')) return R.xau;
+  if (q.includes('fear')||q.includes('greed')||q.includes('sentiment')) return R.fear;
+  if (q.includes('trending')||q.includes('narrative')||q.includes('retail')) return R.trending;
+  if (q.includes('compar')||q.includes('chart')||q.includes('graph')||q.includes('vs')) return R.compare;
+  if (q.includes('bot')||q.includes('grid')||q.includes('status')) return R.bot;
   const avaxTokens = ['joe','qi','benqi','traderjoe','vit','blaze','balln','wavax'];
-  if (avaxTokens.some(tok => t.includes(tok))) return R.yield;
-  return R.def;
+  if (avaxTokens.some(tok => q.includes(tok))) return R.yield;
+
+  // No match — give a clear, helpful response instead of the "still loading" default
+  const preview = t.length > 40 ? t.slice(0, 40) + '…' : t;
+  return `🔍 **No specific intelligence found for "${preview}"**\n\nThe hive searched across all 6 agents but this topic isn't in the current knowledge base.\n\n**Try one of these instead:**\n• **PHAR / P33 / AERO** — AVAX ecosystem token deep dives\n• **TVL** — DeFiLlama on-chain capital flows\n• **Yield / APY / farms** — top AVAX yield opportunities\n• **Fear & Greed / sentiment** — market mood index\n• **Trending** — CoinGecko trending tokens right now\n• **Perps / perpetual** — DEX perp rankings & funding rates\n• **Stablecoin / peg** — peg health monitoring\n• **Hack / exploit** — DeFi security tracker\n• **Moats / HEFE** — Moats Protocol reward intel\n• **Compare / chart / vs** — live asset comparison tool\n• **DexScreener / new pairs** — on-chain pair discovery\n• **Bot / grid / status** — trading bot status\n\n→ For live price data on any coin, use the **Compare** tab and type the token name.`;
 }
 
 function showResponse(q) {
@@ -801,11 +802,14 @@ function showResponse(q) {
   a.style.display='block';
   t.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
   a.scrollIntoView({behavior:'smooth',block:'nearest'});
+  const response = findResponse(q);
+  // If it's a no-match response, resolve faster so it doesn't feel like a hang
+  const delay = response.startsWith('🔍') ? 600 : 1200;
   setTimeout(()=>{
-    t.innerHTML = findResponse(q)
+    t.innerHTML = response
       .replace(/\n/g,'<br>')
       .replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--white)">$1</strong>');
-  }, 1500);
+  }, delay);
 }
 
 function handleSearch() {
